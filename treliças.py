@@ -7,7 +7,7 @@ class Treliças ():
 
         self.area = 1
         self.moduloElasticidade = 1
-        self.mGlobal = None
+        self.mGlobal = np.array([])
         self.mmLocal = []
 
 
@@ -38,19 +38,30 @@ class Treliças ():
         self.large = []
         self.lambx = []
         self.lamby = []
+        ia = 0
         for i in range(0,len(ligacoes)):
             for j in range(i+1,len(ligacoes[i])):
                 if ligacoes[i][j] == 1:
-                    self.large.append((((nos[j][0]-nos[i][0])**2) + ((nos[j][1]-nos[i][1])**2))**(1/2))
+                    large = (((nos[j][0]-nos[i][0])**2) + ((nos[j][1]-nos[i][1])**2))**(1/2)
+                    self.large.append(large)
 
-                    self.lambx.append(((nos[j][0] - nos[i][0]) / self.large[len(self.large)-1]))
+                    lambx = ((nos[j][0] - nos[i][0]) / self.large[len(self.large)-1])
+                    self.lambx.append(lambx)
 
-                    self.lamby.append(((nos[j][1] - nos[i][1]) / self.large[len(self.large)-1]))
-                    posil = (i*2+1,i*2+2)
-                    posicol = (j*2+1,j*2+2)
+                    lamby = ((nos[j][1] - nos[i][1]) / self.large[len(self.large)-1])
+                    self.lamby.append(lamby)
+
+                    posil = (i*2,i*2+1)
+                    posicol = (j*2,j*2+1)
+
+                    mlocal = self.matrizLocalADJC(lambx,lamby,large,posil,posicol)
+                 #   if ia < 4:
+                  #      print("Matriz local adadadada\n", mlocal)
+                    self.matrizGlobal(nos,posil,posicol,mlocal)
+
+                    ia += 1
 
 
-        self.numBarras = len(self.large)
 
 
 
@@ -79,37 +90,64 @@ class Treliças ():
 
 
 
-    def matrizLocalADJC(self): #Falta generalizar essa função para n nós
-        n = self.numBarras
-        mmLocal = []
-        for i in range (n):
-            lambx = self.lambx[i]
-            lamby = self.lamby[i]
-            l = self.large[i]
-            #print("Valores de: ",lambx,lamby,l)
-            mLocal = np.array([
-                [lambx**2, lamby*lamby, -lambx**2, -lambx*lamby],
-                [lambx*lamby, lamby**2, -lambx*lamby, -lamby**2],
-                [-lambx**2, -lamby*lamby, lambx**2, lambx*lamby],
-                [-lambx*lamby, -lamby**2, lambx*lamby, lamby**2],
-            ])
-            #Pesquisar sobre o numpy
-            mLocal = (self.area*self.moduloElasticidade/l)*mLocal
-            mmLocal.append(mLocal)
-            print(mLocal)
-        #print(mmLocal)
-        return mmLocal
+    def matrizLocalADJC(self,lambx,lamby,large,posil,posicol):
+
+        lambx = lambx
+        lamby = lamby
+        l = large
+
+        mLocal = np.array([
+            [lambx**2, lamby*lamby, -lambx**2, -lambx*lamby],
+            [lambx*lamby, lamby**2, -lambx*lamby, -lamby**2],
+            [-lambx**2, -lamby*lamby, lambx**2, lambx*lamby],
+            [-lambx*lamby, -lamby**2, lambx*lamby, lamby**2],
+        ])
+
+        mLocal = (self.area*self.moduloElasticidade/l)*mLocal
+        self.mmLocal.append(mLocal)
+
+        return mLocal
+
+
+
+
+    def pritglob(self):
+
+        for i in range(len(self.mGlobal)):
+            for j in range(len(self.mGlobal)):
+                print(f"[ {round(self.mGlobal[i][j],2):^3} ]",end="")
+            print()
 
     def matrizGlobal (self,nos,posilinha,posicoluna,mlocal):
 
-        if self.mGlobal == None:
-            self.mGlobal = np.zeros([len(nos)*3,len(nos)*3])
+        if len(self.mGlobal) == 0:
+            self.mGlobal = np.zeros([len(nos)*2,len(nos)*2])
 
 
 
-        for i in range(len(mlocal)):
-            for j in range(len(mlocal)):
-                self.mGlobal[posilinha[i]][posicoluna[j]] += mlocal[i][j]
+        for i in range(len(posilinha)):
+            for j in range(len(posilinha)):
+                self.mGlobal[posilinha[i]][posilinha[j]] += mlocal[i][j]
+
+
+        for i in range(len(posicoluna),len(mlocal)):
+            for j in range(len(posicoluna),len(mlocal)):
+                self.mGlobal[posicoluna[i-len(posicoluna)]][posicoluna[j-len(posicoluna)]] += mlocal[i][j]
+
+
+        for i in range(len(posilinha)):
+            for j in range(len(posicoluna),len(mlocal)):
+                self.mGlobal[posilinha[i]][posicoluna[j-len(posicoluna)]] += mlocal[i][j]
+
+
+
+        for i in range(len(posicoluna),len(mlocal)):
+            for j  in range(len(posicoluna)):
+                self.mGlobal[posicoluna[i-len(posicoluna)]][j] += mlocal[i][j]
+
+
+
+
 
 
 

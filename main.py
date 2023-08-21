@@ -11,9 +11,9 @@ if __name__ == '__main__':
     nos = ma.nos()
     a.lambdaADJC(nos,b)
 
-    print(len(a.matrizLocalADJC()))
+    a.pritglob()
 
-    a.matrizGlobal(nos)
+    #a.matrizGlobal(nos)
 
 
 

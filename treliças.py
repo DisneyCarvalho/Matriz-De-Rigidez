@@ -115,7 +115,7 @@ class Treliças ():
 
         for i in range(len(self.mGlobal)):
             for j in range(len(self.mGlobal)):
-                print(f"[ {round(self.mGlobal[i][j],2):^3} ]",end="")
+                print(f"[{round(self.mGlobal[i][j],1):^6}]",end="")
             print()
 
     def matrizGlobal (self,nos,posilinha,posicoluna,mlocal):

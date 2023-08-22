@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 class Treliças ():
 
@@ -111,11 +112,26 @@ class Treliças ():
 
 
 
+
+    def setCor(self,i,j,cores):
+
+        if math.floor(i/2) % 2 == 0: #Linha par 11
+            return cores[math.floor((j / 2) +3) % 8]
+
+
+        if math.floor(i/2) % 2 == 1:  ##linha Impar
+            return cores[math.floor(j / 2) % 8]
+
+
+
+
     def pritglob(self):
+        cores = ['\033[0;0m \033[37m', '\033[0;0m \033[36m', '\033[1m \033[30m', '\033[0;0m \033[33m', '\033[0;0m \033[35m', '\033[0;0m \033[34m', '\033[0;0m \033[32m', '\033[0;0m \033[31m']
 
         for i in range(len(self.mGlobal)):
             for j in range(len(self.mGlobal)):
-                print(f"[{round(self.mGlobal[i][j],1):^6}]",end="")
+                cor = self.setCor(i,j,cores)
+                print(f"{cor}[{round(self.mGlobal[i][j],1):^6}]",end="")
             print()
 
     def matrizGlobal (self,nos,posilinha,posicoluna,mlocal):
